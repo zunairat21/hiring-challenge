@@ -3,7 +3,7 @@
 ## The Position
 AI Engineer - Mobile Automation  
 Recent Graduates | India/Pakistan  
-$2-3K/month → $3-4K after 90 days + equity
+$2K/month → $3-4K after 90 days + equity
 
 ## The Challenge
 Build an AI Agent that controls Android devices autonomously.
