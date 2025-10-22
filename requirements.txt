@@ -1,0 +1,9 @@
+appium-python-client==2.7.0
+adbutils==0.3.0
+opencv-python
+pillow
+pytesseract
+fastapi
+uvicorn
+python-dotenv
+requests
