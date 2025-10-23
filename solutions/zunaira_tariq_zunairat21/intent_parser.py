@@ -1,56 +1,51 @@
-import re
-def detect_intent(cleaned_input: str) -> str:
+# intent_parser.py
+def parse_intent_and_actions(text: str):
     """
-    Detect what the user wants the agent do(e.g . , create account, login, etc. )
+    Simple rule-based intent -> action sequence mapper.
+    Returns: {"intent": str, "actions": [ {type,target,value?}, ... ]}
     """
-    text = cleaned_input.lower()
+    text = (text or "").lower()
 
-    if "create" in text or "new account" in text or "sign up" in text:
-        return "create_account"
-    elif "login" in text or "sign in " in text:
-        return "login"
-    elif "recover" in text or "reset" in text:
-        return "recover_password"
-    else:
-        return "unknown"
-def generate_action_sequence(intent: str) -> list:
-    """
-    Based on detected intent, generate ordered steps the agent will execute
-    """
-    if intent == "create_account":
-        return [
-            "open_outlook_app",
-            "tap_create_account",
-            "enter_username",
-            "enter_password",
-            "enter_name",
-            "enter_dob", 
-            "solve_captcha", 
-            "confirm_account"
-        ]
-    elif intent == "login":
-        return [
-            "open_outlook_app",
-            "tap_sign_in",
-            "enter_username",
-            "enter_password",
-            "confirm_login"
-        ]
-    elif intent == "recover_password":
-        return [
-            "open_outlook_app",
-            "tap_forgot_password",
-            "enter_email",
-            "verify_identity",
-            "reset_password"
-        ]
-    else: 
-        return []
-    
-def parse_intent_and_actions(cleaned_input: str) :
-    """
-    Full pipeline: detect intent and get corresponding action sequence
-    """
-    intent = detect_intent(cleaned_input)
-    actions = generate_action_sequence(intent)
-    return {"intent":intent, "actions":actions}
+    # Create account flow
+    if ("create" in text or "new account" in text or "crear cuenta" in text) and "outlook" in text:
+        return {
+            "intent": "create_outlook_account",
+            "actions": [
+                {"type": "click", "target": "create_account_button"},
+                {"type": "type",  "target": "username_field", "value": "<<<username>>>"},
+                {"type": "type",  "target": "password_field", "value": "<<<password>>>"},
+                {"type": "type",  "target": "first_last_name_fields", "value": "<<<name>>>"},
+                {"type": "type",  "target": "dob_fields", "value": "1996-02-24"},
+                {"type": "long_press", "target": "captcha_button"},
+                {"type": "click", "target": "accept_button"}
+            ]
+        }
+
+    # Open inbox
+    if "open" in text and "inbox" in text:
+        return {"intent": "open_inbox", "actions": [{"type": "click", "target": "inbox_button"}]}
+
+    # Compose / send email
+    if "send" in text and "email" in text:
+        # simple: open compose; typing recipient handled by action_executor later if value present
+        return {
+            "intent": "send_email",
+            "actions": [
+                {"type": "click", "target": "compose_button"},
+                {"type": "type", "target": "to_field", "value": "alice@example.com"},
+                {"type": "type", "target": "subject_field", "value": "Hello"},
+                {"type": "type", "target": "body_field", "value": "Hi Alice, this is a test."},
+                {"type": "click", "target": "send_button"}
+            ]
+        }
+
+    # Schedule meeting
+    if "schedule" in text and "meeting" in text:
+        return {"intent": "schedule_meeting", "actions": [{"type": "click", "target": "calendar_create_meeting"}]}
+
+    # CAPTCHA test phrase
+    if "captcha" in text or "press and hold" in text or "mantén presionado" in text:
+        return {"intent": "test_captcha_hold", "actions": [{"type": "long_press", "target": "captcha_button", "value": 3}]}
+
+    # fallback
+    return {"intent": "unknown", "actions": []}
