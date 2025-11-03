@@ -2,16 +2,18 @@ from logger import log_step
 from input_handler import handle_user_input
 from intent_parser import parse_intent_and_actions
 from action_executor import ActionExecutor
+import uuid
+import time
 
 def main():
     executor = ActionExecutor()
-    job_id = "session_001"
+    job_id = f"session_{str(uuid.uuid4())[:8]}"
 
     print("🤖 AI Outlook Agent started! Type 'exit' to quit.\n")
     log_step(job_id, "start", True, "Agent started")
 
     while True:
-        user_input = input("You: ")
+        user_input = input("You: ").strip()
 
         if user_input.lower() in ["exit", "quit"]:
             print("👋 Goodbye!")
@@ -29,26 +31,22 @@ def main():
         # Step 2: Parse intent
 
         parsed = parse_intent_and_actions(cleaned["cleaned"])
+        intent = parsed.get("intent")
+        actions = parsed.get("actions", [])
         print(f"🔍 Intent detected: {parsed['intent']}")
         print(f"🧩 Actions: {parsed['actions']}")
         log_step(job_id, "intent_parsed", True, f"Intent: {parsed['intent']}")
 
-        # Step 3: Simulate execution
-        job_id = "session_001"
-        for action in parsed["actions"]:
-            act_type = action.get("type")
-            act_target = action.get("target")
-            act_value = action.get("value")
+        if not actions:
+            print("⚠️ No actions to execute.")
+            log_step(job_id, "no_actions", False, "No actions found.")
+            continue
 
-            if act_type == "click":
-                executor.click(job_id,act_target)
-            elif act_type == "type":
-                executor.type_text(job_id,act_target,act_value)
-            elif act_type == "long_press":
-                executor.long_press(job_id, act_target)
-            else:
-                print(f" ⚠️ Unknown action type : {act_type}")
-                log_step(job_id, "unknown_action", False, f"Unknown: {act_type}")
+        # Step 3:Execute actions (real ADB)
 
+        for action in actions:
+            executor.run_action(job_id, action)
+            time.sleep(1)
+            
 if __name__ == "__main__":
  main()

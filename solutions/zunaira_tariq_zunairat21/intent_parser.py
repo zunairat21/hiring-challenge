@@ -6,6 +6,22 @@ def parse_intent_and_actions(text: str):
     """
     text = (text or "").lower()
 
+    # ---------- Test Commands ----------
+
+    if "test" in text and "tap" in text:
+        return {
+            "intent" : "test_tap",
+            "actions":[{"type":"tap", "target":"500 800"}]
+
+        }
+    
+    if "test" in text and "type" in text:
+        return {
+            "intent": "test_type",
+            "actions": [
+                {"type": "type", "target": "input_field", "value": "hello_outlook"}
+            ]
+        }
     # Create account flow
     if ("create" in text or "new account" in text or "crear cuenta" in text) and "outlook" in text:
         return {
